@@ -1,10 +1,125 @@
 <!DOCTYPE html>
-<html>
-	<body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHACL Form Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-container {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .form-container h2 {
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div id="forms"></div>
 
-		<h1>My First Heading</h1>
-		<p>My first paragraph.</p>
+    <input type="file" id="fileInput" accept=".jsonld" />
 
-	</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.8.1/jsonld.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const jsonldContent = JSON.parse(event.target.result);
+                parseSHACL(jsonldContent);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseSHACL(jsonldContent) {
+            jsonld.expand(jsonldContent, (err, expanded) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                generateForms(expanded);
+            });
+        }
+
+        function generateForms(expanded) {
+            const shapes = expanded.filter(node => node['@type'] && node['@type'].includes('http://www.w3.org/ns/shacl#NodeShape'));
+            const formsContainer = document.getElementById('forms');
+            formsContainer.innerHTML = '';
+
+            shapes.forEach(shape => {
+                const formContainer = document.createElement('div');
+                formContainer.classList.add('form-container');
+                const shapeName = shape['http://www.w3.org/2000/01/rdf-schema#label']?.[0]?.['@value'] || shape['@id'];
+                const title = document.createElement('h2');
+                title.textContent = shapeName;
+                formContainer.appendChild(title);
+
+                const properties = shape['http://www.w3.org/ns/shacl#property'];
+                if (properties) {
+                    properties.forEach(propertyRef => {
+                        const property = expanded.find(node => node['@id'] === propertyRef['@id']);
+                        if (property) {
+                            const path = property['http://www.w3.org/ns/shacl#path']?.[0]?.['@id'] || '';
+                            const name = property['http://www.w3.org/ns/shacl#name']?.[0]?.['@value'] || path;
+                            const formGroup = document.createElement('div');
+                            formGroup.classList.add('form-group');
+
+                            const label = document.createElement('label');
+                            label.setAttribute('for', path);
+                            label.textContent = name;
+                            formGroup.appendChild(label);
+
+                            const shIn = property['http://www.w3.org/ns/shacl#in'];
+                            if (shIn && shIn[0]['@list']) {
+                                const select = document.createElement('select');
+                                select.setAttribute('id', path);
+                                select.setAttribute('name', path);
+                                shIn[0]['@list'].forEach(optionValue => {
+                                    const option = document.createElement('option');
+                                    option.setAttribute('value', optionValue['@value']);
+                                    option.textContent = optionValue['@value'];
+                                    select.appendChild(option);
+                                });
+                                formGroup.appendChild(select);
+                            } else {
+                                const input = document.createElement('input');
+                                input.setAttribute('type', 'text');
+                                input.setAttribute('id', path);
+                                input.setAttribute('name', path);
+                                formGroup.appendChild(input);
+                            }
+
+                            formContainer.appendChild(formGroup);
+                        }
+                    });
+                }
+
+                formsContainer.appendChild(formContainer);
+            });
+        }
+    </script>
+</body>
 </html>
 
