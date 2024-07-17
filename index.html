@@ -53,6 +53,10 @@
             cursor: pointer;
         }
     </style>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
 <body>
     <h2>Previous Submissions</h2>
@@ -80,6 +84,20 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.8.1/jsonld.min.js"></script>
     <script>
+        // Firebase configuration
+	const firebaseConfig = {
+    	apiKey: "AIzaSyAbA1vHZzl6SxLLKpOZSXdUwzWQAookOtQ",
+   	 authDomain: "asmp-2d17a.firebaseapp.com",
+    	projectId: "asmp-2d17a",
+    	storageBucket: "asmp-2d17a.appspot.com",
+    	messagingSenderId: "621049589977",
+    	appId: "1:621049589977:web:05f78feb8bd90079df8ec8",
+    	measurementId: "G-GGRSZCGNZB"
+  	};	
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
             document.getElementById('formFileInput').addEventListener('change', handleFormFileSelect, false);
@@ -210,7 +228,7 @@
             downloadAnchorNode.remove();
         }
 
-        function submitForm() {
+        async function submitForm() {
             const forms = document.querySelectorAll('.form-container');
             let formData = {};
 
@@ -221,33 +239,38 @@
                 });
             });
 
-            const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-            const submissionId = submissions.length + 1;
-            submissions.push({ id: submissionId, data: formData });
-            localStorage.setItem('submissions', JSON.stringify(submissions));
-            addSubmissionToTable(submissionId, formData);
+            try {
+                const docRef = await db.collection('submissions').add(formData);
+                addSubmissionToTable(docRef.id, formData);
+            } catch (error) {
+                console.error('Error adding document: ', error);
+            }
         }
 
-        function loadSubmissions() {
-            const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-            submissions.forEach(submission => {
-                addSubmissionToTable(submission.id, submission.data);
-            });
+        async function loadSubmissions() {
+            const tableBody = document.getElementById('submissionsTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            try {
+                const querySnapshot = await db.collection('submissions').get();
+                querySnapshot.forEach(doc => {
+                    addSubmissionToTable(doc.id, doc.data());
+                });
+            } catch (error) {
+                console.error('Error getting documents: ', error);
+            }
         }
 
         function addSubmissionToTable(id, data) {
             const tableBody = document.getElementById('submissionsTable').querySelector('tbody');
             const row = document.createElement('tr');
             row.addEventListener('click', () => populateForm(data));
-
             const idCell = document.createElement('td');
             idCell.textContent = id;
-            row.appendChild(idCell);
-
             const jsonCell = document.createElement('td');
             jsonCell.textContent = JSON.stringify(data);
+            row.appendChild(idCell);
             row.appendChild(jsonCell);
-
             tableBody.appendChild(row);
         }
     </script>
