@@ -33,15 +33,48 @@
         .buttons {
             margin-top: 20px;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <h2>Previous Submissions</h2>
+    <table id="submissionsTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>JSON</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Table rows will be inserted here dynamically -->
+        </tbody>
+    </table>
+
     <div id="forms"></div>
 
     <input type="file" id="fileInput" accept=".jsonld" />
     <input type="file" id="formFileInput" accept=".json" />
 
     <div class="buttons">
+        <button id="submitButton">Submit Form</button>
         <button id="exportButton">Export Completed Form</button>
     </div>
 
@@ -50,7 +83,9 @@
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
             document.getElementById('formFileInput').addEventListener('change', handleFormFileSelect, false);
+            document.getElementById('submitButton').addEventListener('click', submitForm, false);
             document.getElementById('exportButton').addEventListener('click', exportForm, false);
+            loadSubmissions();
         });
 
         let currentFormData = {};
@@ -173,6 +208,47 @@
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
+        }
+
+        function submitForm() {
+            const forms = document.querySelectorAll('.form-container');
+            let formData = {};
+
+            forms.forEach(form => {
+                const inputs = form.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    formData[input.name] = input.value;
+                });
+            });
+
+            const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            const submissionId = submissions.length + 1;
+            submissions.push({ id: submissionId, data: formData });
+            localStorage.setItem('submissions', JSON.stringify(submissions));
+            addSubmissionToTable(submissionId, formData);
+        }
+
+        function loadSubmissions() {
+            const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            submissions.forEach(submission => {
+                addSubmissionToTable(submission.id, submission.data);
+            });
+        }
+
+        function addSubmissionToTable(id, data) {
+            const tableBody = document.getElementById('submissionsTable').querySelector('tbody');
+            const row = document.createElement('tr');
+            row.addEventListener('click', () => populateForm(data));
+
+            const idCell = document.createElement('td');
+            idCell.textContent = id;
+            row.appendChild(idCell);
+
+            const jsonCell = document.createElement('td');
+            jsonCell.textContent = JSON.stringify(data);
+            row.appendChild(jsonCell);
+
+            tableBody.appendChild(row);
         }
     </script>
 </body>
