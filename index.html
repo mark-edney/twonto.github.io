@@ -86,7 +86,24 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.8.1/jsonld.min.js"></script>
-    <script>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script>
+    Office.onReady(function (info) {
+      if (info.host === Office.HostType.Excel) {
+        document.getElementById("writeButton").onclick = writeData;
+      }
+    });
+
+    function writeData(data) {
+      Excel.run(function (context) {
+        var sheet = context.workbook.worksheets.getActiveWorksheet();
+        var range = sheet.getRange("A1");
+        range.values = [[data]];
+        return context.sync();
+      }).catch(function (error) {
+        console.error(error);
+      });
+    }
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
@@ -245,7 +262,9 @@
 
             try {
                 const docRef = await db.collection('submissions').add(formData);
-                addSubmissionToTable(docRef.id, formData);
+                writeData(formData);
+		addSubmissionToTable(docRef.id, formData);
+		
             } catch (error) {
                 console.error('Error adding document: ', error);
             }
