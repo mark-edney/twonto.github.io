@@ -67,6 +67,7 @@
     <textarea id="w3review" name="w3review" rows="4" cols="50"></textarea>
 
     <buttion onclick="updateCell" type="button">Submit</button>
+    <input id="cell" />
 
     <h2>Previous Submissions</h2>
     <table id="submissionsTable">
@@ -104,7 +105,8 @@
     function writeData(data) {
       Excel.run(function (context) {
         var sheet = context.workbook.worksheets.getActiveWorksheet();
-        var range = sheet.getRange("A1");
+        var cell = document.getElementById("cell").value
+        var range = sheet.getRange(cell);
         range.values = [[JSON.stringify(data)]];
         console.log("test")
         console.log(data)
