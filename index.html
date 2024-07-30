@@ -232,6 +232,9 @@
                     console.log(element)
                 }
             }
+            const event = new Event('change', { bubbles: true });
+            element.dispatchEvent(event);
+
         }
 
         function exportForm() {
