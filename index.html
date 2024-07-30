@@ -202,11 +202,11 @@
                                 });
                                 formGroup.appendChild(select);
                             } else {
-                                path = property['http://www.w3.org/ns/shacl#class']?.[0]?.['@id'] || '';
+                                var class = property['http://www.w3.org/ns/shacl#class']?.[0]?.['@id'] || '';
                                 const input = document.createElement('input');
                                 input.setAttribute('type', 'text');
-                                input.setAttribute('id', path);
-                                input.setAttribute('name', path);
+                                input.setAttribute('id', class);
+                                input.setAttribute('name', class);
                                 formGroup.appendChild(input);
                             }
 
