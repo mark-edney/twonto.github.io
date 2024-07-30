@@ -290,9 +290,9 @@
             });
 
             try {
-                const docRef = await db.collection('submissions').add(formData);
+                //const docRef = await db.collection('submissions').add(formData);
                 writeData(formData);
-		addSubmissionToTable(docRef.id, formData);
+		        //addSubmissionToTable(docRef.id, formData);
 		
             } catch (error) {
                 console.error('Error adding document: ', error);
