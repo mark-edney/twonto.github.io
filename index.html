@@ -98,7 +98,7 @@
       Excel.run(function (context) {
         var sheet = context.workbook.worksheets.getActiveWorksheet();
         var range = sheet.getRange("A1");
-        range.values = [["data"]];
+        range.values = [[JSON.stringify(data)]];
         console.log(data)
         return context.sync();
       }).catch(function (error) {
