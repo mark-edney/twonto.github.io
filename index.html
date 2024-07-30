@@ -230,10 +230,11 @@
                     element.value = data[key];
                     console.log(element.value)
                     console.log(element)
+                    const event = new Event('change', { bubbles: true });
+                    element.dispatchEvent(event);
+
                 }
             }
-            const event = new Event('change', { bubbles: true });
-            element.dispatchEvent(event);
 
         }
 
