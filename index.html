@@ -99,6 +99,7 @@
         var sheet = context.workbook.worksheets.getActiveWorksheet();
         var range = sheet.getRange("A1");
         range.values = [[JSON.stringify(data)]];
+        console.log("test")
         console.log(data)
         return context.sync();
       }).catch(function (error) {
