@@ -88,11 +88,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.8.1/jsonld.min.js"></script>
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <script>
- /*   Office.onReady(function (info) {
-      if (info.host === Office.HostType.Excel) {
+  Office.onReady(function (info) {
+  /*    if (info.host === Office.HostType.Excel) {
         document.getElementById("writeButton").onclick = writeData;
-      }
-    }); */
+      } */
+    }); 
 
     function writeData(data) {
       Excel.run(function (context) {
