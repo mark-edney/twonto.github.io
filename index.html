@@ -202,6 +202,7 @@
                                 });
                                 formGroup.appendChild(select);
                             } else {
+                                path = property['http://www.w3.org/ns/shacl#class']?.[0]?.['@id'] || '';
                                 const input = document.createElement('input');
                                 input.setAttribute('type', 'text');
                                 input.setAttribute('id', path);
