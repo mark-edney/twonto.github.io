@@ -17,9 +17,19 @@ function bindEvents() {
     });
 }
 
-function onWorksheetChange(event) {
-    console.log("Worksheet changed: ", event);
-    // Add your custom logic here
+async function onWorksheetChange(event) {
+    await Excel.run(async (context) => {
+        const sheet = context.workbook.worksheets.getActiveWorksheet();
+        const range = sheet.getRange(event.address);
+        range.load("values");
+        await context.sync();
+        
+        const cellValue = range.values[0][0];
+        console.log("Cell changed: ", event.address, cellValue);
+        document.getElementById("output").innerText = `Cell ${event.address} changed to: ${cellValue}`;
+    }).catch(error => {
+        console.error(error);
+    });
 }
 
 function onSelectionChange(event) {
